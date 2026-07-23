@@ -470,6 +470,31 @@ window.SEED_PERIOD="2569-06";
 .vd-lg{font-size:11px;color:var(--muted,#8a897f);padding:2px 16px 8px}
 .vd-lg .i{color:var(--good,#2aa889);font-weight:700}
 .vd-lg .o{color:var(--s6,#e34948);font-weight:700}
+/* ===== หน้าภาพรวมการขาย (Sales Overview) ===== */
+.sv-pill{display:inline-block;font-size:11px;font-weight:700;border-radius:20px;padding:1px 9px;color:#fff}
+.sv-pill.g{background:var(--good,#1a9c6b)}.sv-pill.y{background:var(--warn,#e0a417)}.sv-pill.r{background:var(--crit,#e34948)}.sv-pill.n{background:#b9bcc7}
+.sv-note{background:#fff4e6;border:1px solid #f5d9a8;border-radius:9px;padding:9px 13px;font-size:12.5px;color:#9a6a00;margin-bottom:12px}
+.sv-bars .barrow{display:flex;align-items:center;gap:10px;padding:5px 0;font-size:12px}
+.sv-bars .nm{min-width:120px;color:var(--ink-2)}
+.sv-bars .track{flex:1;height:20px;background:#e8eaf2;border-radius:5px;position:relative;overflow:hidden}
+.sv-bars .fill{display:block;height:100%;border-radius:5px 0 0 5px}
+.sv-bars .tgt{position:absolute;top:-2px;bottom:-2px;width:3px;background:#111;opacity:.7}
+.sv-bars .pc{min-width:180px;text-align:right;font-variant-numeric:tabular-nums;font-size:11.5px}
+.sv-mini .r{display:flex;justify-content:space-between;align-items:center;padding:4px 0;border-bottom:1px solid #f4f5f8;font-size:12px}
+.sv-mini .r:last-child{border-bottom:none}
+.sv-mini .b{flex:1;height:8px;background:#eef0f7;border-radius:4px;margin:0 10px;overflow:hidden}
+.sv-mini .b>i{display:block;height:100%;border-radius:4px;background:var(--brand-2,#2f40c0)}
+#salesBrList{max-height:60vh;overflow-y:auto;padding:6px 16px 14px}
+#salesBrList::-webkit-scrollbar{width:7px}#salesBrList::-webkit-scrollbar-thumb{background:#d9dae0;border-radius:6px}
+#salesMixList{max-height:62vh;overflow-y:auto}
+#salesMixList::-webkit-scrollbar{width:7px}#salesMixList::-webkit-scrollbar-thumb{background:#d9dae0;border-radius:6px}
+.sc-tab.active{background:var(--brand,#1e2b96)!important;color:#fff!important;border-color:var(--brand,#1e2b96)!important}
+#salesMixList .mixbtn.active{background:var(--brand,#1e2b96)!important;color:#fff!important;border-color:var(--brand,#1e2b96)!important}
+#salesBody .trmode.active{background:var(--brand,#1e2b96)!important;color:#fff!important;border-color:var(--brand,#1e2b96)!important}
+#salesMixList{padding:6px 16px 14px;overflow-x:auto}
+#salesMixList table.sum{font-size:12px}
+#salesMixList table.sum th,#salesMixList table.sum td{white-space:nowrap}
+#salesMixList table.sum td:first-child{max-width:190px;overflow:hidden;text-overflow:ellipsis}
 </style>
 </head>
 <body>
@@ -492,6 +517,7 @@ window.SEED_PERIOD="2569-06";
     <div class="navgrp" data-grp="vehicles">
       <button class="dsw navhead" data-dash="vehicles">📦 รายการสต๊อค <span class="caret">▸</span></button>
       <nav class="navsub" id="vehTabs">
+        <button class="tab" data-vtab="sales">🎯 ภาพรวมการขาย</button>
         <button class="tab active" data-vtab="new">🆕 รถใหม่</button>
         <button class="tab" data-vtab="used">♻️ รถมือสอง</button>
         <button class="tab" data-vtab="auction">🔨 รถประมูล</button>
@@ -851,7 +877,7 @@ window.SEED_PERIOD="2569-06";
       <button class="modal-close" id="budClose">✕</button>
     </div>
     <div class="modal-body" id="budBody"></div>
-    <div class="modal-foot"><span class="hint">งบใช้เป็นยอดอ้างอิงเทียบกับรายจ่ายจริงแต่ละเดือน · บันทึกในเครื่องอัตโนมัติ</span><button class="goto" id="budSave">💾 บันทึกงบ</button></div>
+    <div class="modal-foot"><span class="hint">งบใช้เป็นยอดอ้างอิงเทียบกับรายจ่ายจริงแต่ละเดือน · บันทึกในเครื่องอัตโนมัติ</span><div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap"><button class="btn sm" id="budExport" title="ส่งออกงบ + เป้าซื้อรถ เป็นไฟล์ .json สำหรับย้ายไปเครื่องอื่น">⬇ ส่งออกงบ</button><button class="btn sm" id="budImport" title="นำเข้าไฟล์งบ .json ที่ส่งออกไว้">⬆ นำเข้างบ</button><input type="file" id="budImportFile" accept=".json,application/json" style="display:none"><button class="goto" id="budSave">💾 บันทึกงบ</button></div></div>
   </div>
 </div>
 <div id="drvModal" class="modal-back">
@@ -940,6 +966,25 @@ window.SEED_PERIOD="2569-06";
 </header>
 <div class="wrap">
   <div class="infobar"><span>🏍️</span><div>บันทึกรถ<b>รายคัน</b> — กรอกในตารางหรือ<b>นำเข้า Excel</b> (ชีต “รถใหม่”, “รถมือสอง”) · ระบบสรุป<b>จำนวนคงคลัง / จอง / ขายแล้ว</b> และ<b>อายุสต๊อก</b>ให้อัตโนมัติ · ข้อมูลชุดนี้<b>แยกจากแดชบอร์ดรายจ่าย</b> และจำไว้ในเครื่อง</div></div>
+  <section class="vpage" id="vpage-sales" style="display:none">
+    <div id="salesTabs" style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:10px">
+      <button class="btn sm sc-tab active" data-scat="new">🆕 รถใหม่</button>
+      <button class="btn sm sc-tab" data-scat="used">♻️ รถมือสอง</button>
+      <button class="btn sm sc-tab" data-scat="parts">🔧 อะไหล่</button>
+      <button class="btn sm sc-tab" data-scat="giveaway">🎁 ของแถม</button>
+    </div>
+    <div style="display:flex;gap:8px;align-items:center;margin-bottom:10px;flex-wrap:wrap">
+      <button class="btn" id="stgtImportBtn" title="นำเข้าเป้า (ทั้งปี + รายเดือน) รายสาขา สำหรับหมวดที่เลือก">⬆ นำเข้าเป้า (รถใหม่)</button>
+      <button class="btn" id="stgtTemplateBtn" title="ดาวน์โหลดเทมเพลตไฟล์เป้าการขาย">📄 เทมเพลตเป้า</button>
+      <button class="btn" id="stgtExportBtn" title="ส่งออกเป้าการขายที่มีอยู่เป็นไฟล์">⬇ ส่งออกเป้า</button>
+      <input type="file" id="stgtFile" accept=".xlsx,.xls" style="display:none">
+      <span style="width:1px;height:20px;background:var(--ring);margin:0 2px"></span>
+      <button class="btn" id="salesXlsBtn" title="ส่งออกรายงานภาพรวมการขายเป็น Excel (หลายชีต)">⬇ ส่งออกรายงาน</button>
+      <button class="btn" id="salesPrintBtn" title="พิมพ์/บันทึก PDF รายงานภาพรวมการขาย">🖨 พิมพ์รายงาน</button>
+      <span class="cnt" id="stgtCnt"></span>
+    </div>
+    <div id="salesBody"></div>
+  </section>
   <section class="vpage" id="vpage-new">
     <div id="vsum-new"></div>
     <div id="vtrend-new"></div>
@@ -1025,6 +1070,25 @@ window.SEED_PERIOD="2569-06";
     <div class="vd-lg" id="sMonthLeg"></div>
     <div class="vdaily-list" id="sMonthList"></div>
     <div class="vdaily-foot"><button class="xls" id="sMonthXls">⬇ ส่งออก Excel</button><button id="sMonthPrint">🖨 พิมพ์</button></div>
+  </div>
+</div>
+<div id="salesBrModal" class="vdaily-back">
+  <div class="vdaily" style="width:440px">
+    <div class="vdaily-head">
+      <div><h4 id="salesBrTitle">ขายจริง vs เป้า รายสาขา</h4><div class="vm" id="salesBrSub"></div></div>
+      <button class="vdaily-x" id="salesBrClose">✕</button>
+    </div>
+    <div class="vd-lg" style="padding-top:8px">แท่ง = ขายจริง · เส้นดำ = เป้า · <span style="color:var(--good)">เขียว ≥100%</span> · <span style="color:var(--warn)">เหลือง 80–99%</span> · <span style="color:var(--crit)">แดง &lt;80%</span></div>
+    <div class="sv-bars" id="salesBrList"></div>
+  </div>
+</div>
+<div id="salesMixModal" class="vdaily-back">
+  <div class="vdaily" style="width:640px;max-width:96vw">
+    <div class="vdaily-head">
+      <div><h4>🔎 เจาะรุ่น × สี · วิเคราะห์จัดซื้อ</h4><div class="vm" id="salesMixSub"></div></div>
+      <button class="vdaily-x" id="salesMixClose">✕</button>
+    </div>
+    <div class="vdaily-list" id="salesMixList" style="padding:6px 16px 14px"></div>
   </div>
 </div>
 <div id="calPrint"></div>
@@ -2381,6 +2445,36 @@ document.getElementById('budSave').onclick=()=>{
   saveBudget();renderAllSummaries();renderBudgetCards();closeBudget();toast('บันทึกงบประมาณ & เป้าหมาย ปี '+y+' เรียบร้อย','ok');
 };
 document.getElementById('btnBudget').onclick=openBudget;
+/* ===== ส่งออก/นำเข้า งบ + เป้าซื้อรถ (แตะเฉพาะ BUDGET/TARGETS — ไม่กระทบข้อมูลอื่น) ===== */
+function budExportFile(){
+  try{
+    const payload={app:'moto24',type:'budget',v:1,exportedYear:curYear(),BUDGET:BUDGET,TARGETS:TARGETS};
+    const blob=new Blob([JSON.stringify(payload)],{type:'application/json'});
+    const url=URL.createObjectURL(blob);const a=document.createElement('a');
+    a.href=url;a.download='moto24_งบประมาณ.json';document.body.appendChild(a);a.click();
+    setTimeout(()=>{URL.revokeObjectURL(url);a.remove();},120);
+    toast('ส่งออกงบ + เป้าซื้อรถแล้ว','ok');
+  }catch(e){toast('ส่งออกไม่สำเร็จ: '+e.message,'err');}
+}
+function budImportRead(file){
+  const rd=new FileReader();
+  rd.onload=ev=>{try{
+    const o=JSON.parse(ev.target.result);
+    if(!o||(o.type&&o.type!=='budget')){toast('ไฟล์นี้ไม่ใช่ไฟล์งบของโมโต24','err');return;}
+    const b=o.BUDGET||{},t=o.TARGETS||{};
+    if(typeof b!=='object'||typeof t!=='object'){toast('ไฟล์งบไม่ถูกต้อง','err');return;}
+    Object.assign(BUDGET,b);Object.assign(TARGETS,t);
+    saveBudget();
+    if(document.getElementById('budModal').classList.contains('open'))openBudget();
+    renderAllSummaries();renderBudgetCards();
+    const yrs=Object.keys(b).join(', ');
+    toast('นำเข้างบ + เป้าซื้อรถแล้ว'+(yrs?(' (ปี '+yrs+')'):''),'ok');
+  }catch(err){toast('อ่านไฟล์งบไม่สำเร็จ: '+err.message,'err');}};
+  rd.readAsText(file);
+}
+document.getElementById('budExport').onclick=budExportFile;
+document.getElementById('budImport').onclick=()=>document.getElementById('budImportFile').click();
+document.getElementById('budImportFile').onchange=e=>{const f=e.target.files[0];if(f)budImportRead(f);e.target.value='';};
 document.getElementById('budModal').addEventListener('click',e=>{if(e.target.id==='budModal'||e.target.closest('#budClose'))closeBudget();});
 document.addEventListener('click',e=>{if(e.target.closest('[data-openbud]'))openBudget();});
 
@@ -3162,8 +3256,9 @@ function renderVehMoves(cat){
 }
 function renderVeh(){renderVehPeriodControls();renderVehSummary('new');renderVehTrend('new');renderVehMoves('new');renderVehTable('new');renderVehSummary('used');renderVehTrend('used');renderVehMoves('used');renderVehTable('used');}
 function vehSwitch(cat){vehTab=cat;document.querySelectorAll('#vehTabs .tab').forEach(x=>x.classList.toggle('active',x.dataset.vtab===cat));
-  ['new','used','report','auction','giveaway','parts'].forEach(t=>{const el=document.getElementById('vpage-'+t);if(el)el.style.display=cat===t?'':'none';});
+  ['sales','new','used','report','auction','giveaway','parts'].forEach(t=>{const el=document.getElementById('vpage-'+t);if(el)el.style.display=cat===t?'':'none';});
   if(cat==='report')renderVehReport();
+  if(cat==='sales')renderSales();
   if(typeof SMODS!=='undefined'&&SMODS[cat])renderSMod(cat);}
 /* ============ รายงาน/พิมพ์ (รอบครึ่งเดือน 1–16 / ทั้งเดือน · แยกรถใหม่/มือสอง) ============ */
 let vrepCat='new', vrepY=0, vrepM=0, vrepMode='full';
@@ -3758,6 +3853,317 @@ function sShowMonthly(mod){
   back.classList.add('open');
 }
 function sHideMonthly(){const b=document.getElementById('sMonthModal');if(b)b.classList.remove('open');}
+/* ============ ภาพรวมการขาย (Sales Overview) — เฟส 1: รถใหม่ · แตะเฉพาะส่วนนี้ ไม่กระทบตรรกะเดิม ============ */
+const STGT_KEY='moto24_saletarget_v1';
+const STGT={new:{},used:{},parts:{},giveaway:{}};
+let salesCat='new';
+function stgtSave(){try{localStorage.setItem(STGT_KEY,JSON.stringify(STGT));}catch(e){}}
+function stgtLoad(){try{const j=localStorage.getItem(STGT_KEY);if(j){const o=JSON.parse(j);if(o&&typeof o==='object'){['new','used','parts','giveaway'].forEach(c=>{STGT[c]=o[c]||{};});}}}catch(e){}}
+function salesYear(){const cat=salesCat;let ys;
+  if(cat==='new'||cat==='used')ys=vehRows(cat).map(r=>{const k=vKey(r.saleDate);return k?k[0]:0;});
+  else ys=(SDATA[cat]||[]).map(r=>{const k=sMonKey(r);return k?k[0]:0;});
+  if(vehFY)return +vehFY; ys=ys.filter(Boolean); return ys.length?Math.max(...ys):(new Date().getFullYear());}
+let _salesBr=null,_salesMix=null;
+function salesCatLabel(c){return {new:'รถใหม่',used:'รถมือสอง',parts:'อะไหล่',giveaway:'ของแถม'}[c]||c;}
+function salesIsVeh(c){return c==='new'||c==='used';}
+function salesBranches(c){return salesIsVeh(c)?((VEH_BRANCHES[c]||[]).map(b=>b.c)):S_BRANCHES.map(b=>b.c);}
+const _pcv=(a,t)=>t>0?Math.round(a/t*100):null;
+function _svPill(a,t){const p=_pcv(a,t);if(p==null)return '<span class="sv-pill n">—</span>';const c=p>=100?'g':p>=80?'y':'r';return '<span class="sv-pill '+c+'">'+p+'%</span>';}
+function _svBar(nm,a,t,mx){const p=_pcv(a,t);
+  const col=p==null?'#b9bcc7':p>=100?'var(--good)':p>=80?'var(--warn)':'var(--crit)';
+  const dot=p==null?'⚪':p>=100?'🟢':p>=80?'🟡':'🔴';
+  const pcCol=p==null?'#8a897f':p>=100?'var(--good)':p>=80?'#a5730a':'var(--crit)';
+  const d=a-t,diff=t?(d>=0?'<span style="color:var(--good)">เกิน '+num(d)+'</span>':'<span style="color:var(--crit)">ขาด '+num(-d)+'</span>'):'';
+  return '<div class="barrow"><span class="nm">'+dot+' '+esc(nm)+'</span><span class="track"><span class="fill" style="width:'+Math.round((mx?a/mx:0)*100)+'%;background:'+col+'"></span>'+(t?'<span class="tgt" style="left:'+Math.round((mx?t/mx:0)*100)+'%"></span>':'')+'</span><span class="pc"><b>'+num(a)+'</b>/'+num(t)+' · <b style="color:'+pcCol+'">'+(p==null?'—':p+'%')+'</b>'+(diff?' · '+diff:'')+'</span></div>';}
+function _trendBox(mAct,mTgt){
+  const mx=Math.max(1,...mAct,...mTgt),cm=vehFM||0;
+  return '<div style="display:flex;gap:4px;align-items:flex-end">'+mAct.map((a,i)=>{const t=mTgt[i]||0,p=_pcv(a,t),col=p==null?'#9aa0b5':p>=100?'var(--good)':p>=80?'var(--warn)':'var(--crit)',hi=cm===i+1?'outline:2px solid var(--brand);outline-offset:1px;':'';
+    return '<div style="flex:1;min-width:0;display:flex;flex-direction:column;align-items:center;gap:3px"><div title="'+VMON_S[i]+' · จริง '+num(a)+' / เป้า '+num(t)+'" style="width:100%;height:72px;position:relative;display:flex;align-items:flex-end"><div style="width:66%;margin:0 auto;background:'+col+';height:'+Math.round(a/mx*100)+'%;min-height:1px;border-radius:3px 3px 0 0;'+hi+'"></div>'+(t?'<div style="position:absolute;left:8%;right:8%;bottom:'+Math.round(t/mx*100)+'%;height:2px;background:#111;opacity:.5"></div>':'')+'</div><div style="font-size:9.5px;color:var(--muted)">'+VMON_S[i]+'</div></div>';}).join('')+'</div>';
+}
+let _trendMode='target',_salesData=null;
+function _yoyBox(mPrev,mCur){
+  const mx=Math.max(1,...mPrev,...mCur),cm=vehFM||0;
+  return '<div style="display:flex;gap:4px;align-items:flex-end">'+mCur.map((c,i)=>{const pv=mPrev[i]||0,hi=cm===i+1?'outline:2px solid var(--accent);outline-offset:1px;':'';
+    return '<div style="flex:1;min-width:0;display:flex;flex-direction:column;align-items:center;gap:3px"><div title="'+VMON_S[i]+' · ปีก่อน '+num(pv)+' / ปีนี้ '+num(c)+'" style="height:72px;display:flex;gap:2px;align-items:flex-end;justify-content:center"><div style="width:8px;background:#9fb2e6;height:'+Math.round(pv/mx*100)+'%;min-height:1px;border-radius:2px 2px 0 0"></div><div style="width:8px;background:var(--brand);height:'+Math.round(c/mx*100)+'%;min-height:1px;border-radius:2px 2px 0 0;'+hi+'"></div></div><div style="font-size:9.5px;color:var(--muted)">'+VMON_S[i]+'</div></div>';}).join('')+'</div>';
+}
+function _trendSection(y,mAct,mTgt,mPrev,curTot,prevTot,unitTxt){
+  const head='<div class="blockhead"><h3>📈 แนวโน้มรายเดือน · ปี '+y+'</h3><span class="hint">'+(_trendMode==='yoy'?('<span style="color:#5f78c9;font-weight:700">■</span> '+(y-1)+' &nbsp; <span style="color:var(--brand);font-weight:700">■</span> '+y):(unitTxt+'=จริง · ขีดดำ=เป้า'))+'</span><span style="flex:1"></span><button class="btn sm trmode'+(_trendMode==='target'?' active':'')+'" data-trmode="target">เทียบเป้า</button><button class="btn sm trmode'+(_trendMode==='yoy'?' active':'')+'" data-trmode="yoy">เทียบปีก่อน</button></div>';
+  let body;
+  if(_trendMode==='yoy'){const dp=prevTot?Math.round((curTot-prevTot)/prevTot*100):null;body=_yoyBox(mPrev,mAct)+'<div class="hint" style="margin-top:6px">รวมปี '+y+' <b>'+num(curTot)+'</b> vs ปี '+(y-1)+' <b>'+num(prevTot)+'</b> · '+(dp==null?'—':(dp>=0?'<span style="color:var(--good)">+'+dp+'%</span>':'<span style="color:var(--crit)">'+dp+'%</span>'))+'</div>';}
+  else body=_trendBox(mAct,mTgt);
+  return '<div class="block">'+head+body+'</div>';
+}
+function _wireSalesBody(box){
+  const bb=document.getElementById('salesBrBtn');if(bb)bb.onclick=salesShowBranches;
+  const mb=document.getElementById('salesMixBtn');if(mb)mb.onclick=salesShowMix;
+  box.querySelectorAll('[data-trmode]').forEach(b=>b.onclick=()=>{_trendMode=b.dataset.trmode;renderSales();});
+}
+function renderSales(){
+  document.querySelectorAll('#salesTabs .sc-tab').forEach(x=>x.classList.toggle('active',x.dataset.scat===salesCat));
+  if(salesIsVeh(salesCat))renderSalesVeh(salesCat);else renderSalesMod(salesCat);
+}
+function renderSalesVeh(cat){
+  const box=document.getElementById('salesBody');if(!box)return;
+  const rows=vehRows(cat),y=salesYear(),m=vehFM||0;
+  const T=(STGT[cat]&&STGT[cat][y])||{},hasT=Object.keys(T).length>0;
+  const brs=salesBranches(cat).slice();
+  Object.keys(T).forEach(b=>{if(brs.indexOf(b)<0)brs.push(b);});
+  rows.forEach(r=>{const b=r.branch;if(b&&brs.indexOf(b)<0)brs.push(b);});
+  const zoneOf=b=>VEH_ZONE[b]||'(ไม่ระบุ)';
+  const tAnnual=b=>{const o=T[b];return o?(+o.annual||0):0;};
+  const tMon=(b,mo)=>{const o=T[b];if(!o)return 0;const v=o.months&&o.months[mo-1];if(v!==''&&v!=null&&isFinite(+v))return +v;return o.annual?(+o.annual/12):0;};
+  const tgtOf=b=>m?tMon(b,m):tAnnual(b);
+  const act={},prof={};let yearAct=0;const mAct=Array(12).fill(0);
+  rows.forEach(r=>{if(!vIsSold(r))return;const k=vKey(r.saleDate);if(!k||k[0]!==y)return;yearAct++;if(k[1]>=1&&k[1]<=12)mAct[k[1]-1]++;if(m&&k[1]!==m)return;const b=r.branch||'(ไม่ระบุ)';act[b]=(act[b]||0)+1;const gp=vProfit(r);if(gp!=='')prof[b]=(prof[b]||0)+gp;});
+  const mTgt=Array(12).fill(0);for(let mo=1;mo<=12;mo++)mTgt[mo-1]=brs.reduce((s,b)=>s+tMon(b,mo),0);
+  const mPrev=Array(12).fill(0);rows.forEach(r=>{if(!vIsSold(r))return;const k=vKey(r.saleDate);if(!k||k[0]!==y-1)return;if(k[1]>=1&&k[1]<=12)mPrev[k[1]-1]++;});const prevTot=mPrev.reduce((a,b)=>a+b,0);
+  const periodLbl=m?(VMON_S[m-1]+' '+y):('ทั้งปี '+y);
+  const actTot=brs.reduce((s,b)=>s+(act[b]||0),0),tgtTot=brs.reduce((s,b)=>s+tgtOf(b),0);
+  const yearTgtTot=brs.reduce((s,b)=>s+tAnnual(b),0),profTot=brs.reduce((s,b)=>s+(prof[b]||0),0);
+  const withT=brs.filter(b=>tgtOf(b)>0),hitN=withT.filter(b=>(act[b]||0)>=tgtOf(b)).length;
+  const half='<span style="font-size:13px;color:var(--muted)">';
+  const kSub=(a,t)=>{const p=_pcv(a,t);if(p==null)return 'ยังไม่ตั้งเป้า';const d=a-t;return _svPill(a,t)+' '+(d>=0?'เกินเป้า '+num(d):'ต่ำกว่าเป้า '+num(-d))+' คัน';};
+  let kp=kpi('ขายในช่วง ('+periodLbl+')',num(actTot)+' '+half+'/ '+num(tgtTot)+'</span>','คัน',kSub(actTot,tgtTot),SERIES[0])
+    +kpi('สะสมทั้งปี '+y,num(yearAct)+' '+half+'/ '+num(yearTgtTot)+'</span>','คัน',kSub(yearAct,yearTgtTot),SERIES[4])
+    +kpi('สาขาถึงเป้า ('+periodLbl+')',num(hitN)+' '+half+'/ '+num(withT.length)+'</span>','สาขา',withT.length?('ทำได้ตามเป้า '+hitN+' จาก '+withT.length+' สาขา'):'ยังไม่ตั้งเป้า',SERIES[3])
+    +kpi('กำไรขั้นต้น ('+periodLbl+')',baht(profTot),'บาท','ข้อมูลเสริม · เฉลี่ย '+(actTot?baht(Math.round(profTot/actTot)):'—')+' ฿/คัน',SERIES[2]);
+  const zAgg={};brs.forEach(b=>{const z=zoneOf(b);zAgg[z]=zAgg[z]||{tgt:0,act:0,prof:0};zAgg[z].tgt+=tgtOf(b);zAgg[z].act+=(act[b]||0);zAgg[z].prof+=(prof[b]||0);});
+  const zRows=Object.entries(zAgg).sort((a,b)=>{const pa=a[1].tgt?a[1].act/a[1].tgt:-1,pb=b[1].tgt?b[1].act/b[1].tgt:-1;return pb-pa;});
+  const zmax=Math.max(1,...zRows.map(([z,v])=>Math.max(v.act,v.tgt)));
+  const zbars=zRows.map(([z,v])=>_svBar(z,v.act,v.tgt,zmax)).join('');
+  const zoneTbl='<table class="sum"><thead><tr><th>เขต</th><th class="num">เป้า</th><th class="num">ขายจริง</th><th class="num">%</th><th class="num">เกิน/ขาด</th><th class="num">กำไร</th></tr></thead><tbody>'+zRows.map(([z,v])=>{const d=v.act-v.tgt;return '<tr><td>'+esc(z)+'</td><td class="num">'+num(v.tgt)+'</td><td class="num"><b>'+num(v.act)+'</b></td><td class="num">'+_svPill(v.act,v.tgt)+'</td><td class="num" style="color:'+(d>=0?'var(--good)':'var(--crit)')+'">'+(v.tgt?((d>=0?'+':'')+num(d)):'—')+'</td><td class="num">'+baht(v.prof)+'</td></tr>';}).join('')+'</tbody></table>';
+  _salesBr={rows:brs.map(b=>({b:b,act:act[b]||0,tgt:tgtOf(b)})).sort((a,b)=>{const pa=a.tgt?a.act/a.tgt:-1,pb=b.tgt?b.act/b.tgt:-1;return pb-pa;}),period:periodLbl,unit:'คัน'};
+  const mSold={},mRecv={},mStock={},cSold={},mix={};
+  rows.forEach(r=>{const nm=String(r.productName||r.modelCode||'').trim()||'(ไม่ระบุรุ่น)',co=String(r.color||'').trim()||'(ไม่ระบุ)';const sk=vKey(r.saleDate),rk=vKey(r.recvDate);
+    if(vIsSold(r)&&sk&&sk[0]===y&&(!m||sk[1]===m)){mSold[nm]=(mSold[nm]||0)+1;cSold[co]=(cSold[co]||0)+1;const key=nm+'||'+co;mix[key]=(mix[key]||0)+1;}
+    if(rk&&rk[0]===y&&(!m||rk[1]===m))mRecv[nm]=(mRecv[nm]||0)+1;
+    if(!vIsSold(r))mStock[nm]=(mStock[nm]||0)+1;});
+  const topM=Object.entries(mSold).sort((a,b)=>b[1]-a[1]).slice(0,5);
+  const modelTbl='<table class="sum"><thead><tr><th>รุ่น</th><th class="num">ขาย</th><th class="num">รับเข้า</th><th class="num">คงเหลือ(รวม)</th></tr></thead><tbody>'+(topM.map(([nm,s])=>'<tr><td>'+esc(nm)+'</td><td class="num"><b>'+num(s)+'</b></td><td class="num">'+num(mRecv[nm]||0)+'</td><td class="num">'+num(mStock[nm]||0)+'</td></tr>').join('')||'<tr><td colspan="4" style="color:var(--muted)">—</td></tr>')+'</tbody></table>';
+  const topC=Object.entries(cSold).sort((a,b)=>b[1]-a[1]).slice(0,5),cmax=Math.max(1,...topC.map(c=>c[1]));
+  const colorList=topC.map(([c,n])=>'<div class="r"><span style="min-width:80px">'+esc(c)+'</span><span class="b"><i style="width:'+Math.round(n/cmax*100)+'%"></i></span><b style="min-width:36px;text-align:right">'+num(n)+'</b></div>').join('')||'<div style="color:var(--muted)">—</div>';
+  const combo={},pmRecvC={},pmSoldC={};
+  rows.forEach(r=>{const nm=String(r.productName||r.modelCode||'').trim()||'(ไม่ระบุรุ่น)',co=String(r.color||'').trim()||'(ไม่ระบุ)';const key=nm+'||'+co;
+    combo[key]=combo[key]||{recv:0,sold:0,ageSum:0,remain:0};combo[key].recv++;
+    pmRecvC[nm]=pmRecvC[nm]||{};pmRecvC[nm][co]=(pmRecvC[nm][co]||0)+1;
+    if(vIsSold(r)){combo[key].sold++;pmSoldC[nm]=pmSoldC[nm]||{};pmSoldC[nm][co]=(pmSoldC[nm][co]||0)+1;}
+    else{combo[key].remain++;const dd=daysSince(r.recvDate);if(dd!=null)combo[key].ageSum+=dd;}});
+  const mixRows=Object.entries(combo).map(([k,v])=>{const p=k.split('||');const sellPct=v.recv?Math.round(v.sold/v.recv*100):0;
+    let flag='';if(v.recv>=10&&sellPct<60)flag='over';else if(sellPct>=90&&v.remain<=5&&v.recv>=5)flag='refill';
+    return {model:p[0],color:p[1],recv:v.recv,sold:v.sold,remain:v.remain,sellPct:sellPct,avgAge:v.remain?Math.round(v.ageSum/v.remain):0,flag:flag};});
+  const modelMix=Object.keys(pmRecvC).map(nm=>{const rc=pmRecvC[nm],sc=pmSoldC[nm]||{};
+    const recvTot=Object.values(rc).reduce((a,b)=>a+b,0),soldTot=Object.values(sc).reduce((a,b)=>a+b,0);
+    const tr=Object.entries(rc).sort((a,b)=>b[1]-a[1])[0]||['—',0],ts=Object.entries(sc).sort((a,b)=>b[1]-a[1])[0]||['—',0];
+    return {model:nm,recvTot:recvTot,soldTot:soldTot,topRecvColor:tr[0],topRecvPct:recvTot?Math.round(tr[1]/recvTot*100):0,topSoldColor:ts[0],topSoldPct:soldTot?Math.round(ts[1]/soldTot*100):0,match:soldTot>0&&tr[0]===ts[0]};
+  }).sort((a,b)=>b.recvTot-a.recvTot);
+  _salesMix={mixRows:mixRows,modelMix:modelMix,cat:salesCatLabel(cat)};
+  box.innerHTML=(hasT?'':'<div class="sv-note">⚠ ยังไม่มีเป้าการขาย'+salesCatLabel(cat)+'ปี '+y+' — กด “⬆ นำเข้าเป้า” เพื่อเทียบเป้า (ตอนนี้แสดงเฉพาะยอดขายจริง)</div>')
+    +'<div class="block" style="padding-bottom:2px"><div class="blockhead"><h3>🎯 ภาพรวมการขาย — '+salesCatLabel(cat)+' · '+periodLbl+'</h3><span class="hint">วัดด้วยจำนวนคันเทียบเป้า · กำไรเป็นข้อมูลเสริม</span></div><div class="kpis">'+kp+'</div></div>'
+    +'<div class="block"><div class="blockhead"><h3>📊 ขายจริง vs เป้า รายเขต</h3><span class="hint">แท่ง=ขายจริง · เส้นดำ=เป้า</span><button class="btn sm" id="salesBrBtn" style="margin-left:auto">🏢 ดูรายสาขา ('+brs.length+')</button></div><div class="sv-bars">'+zbars+'</div></div>'
+    +_trendSection(y,mAct,mTgt,mPrev,yearAct,prevTot,'แท่ง')
+    +'<div class="grid2"><div class="block"><div class="blockhead"><h3>🗺️ สรุปรายเขต</h3><span class="hint">เรียงตาม % · '+periodLbl+'</span></div>'+zoneTbl+'</div>'
+    +'<div class="block"><div class="blockhead"><h3>🎨 สีขายดี (Top 5)</h3><span class="hint">'+periodLbl+'</span><button class="btn sm" id="salesMixBtn" style="margin-left:auto">🔎 เจาะรุ่น×สี</button></div><div class="sv-mini">'+colorList+'</div></div></div>'
+    +'<div class="block"><div class="blockhead"><h3>🏍️ รุ่นขายดี (Top 5) เทียบรับเข้า/คงเหลือ</h3><span class="hint">'+periodLbl+' · ดูว่าจัดซื้อมาตรงความต้องการไหม</span></div>'+modelTbl+'</div>';
+  _wireSalesBody(box);
+  updateStgtCnt(cat,y,hasT?Object.keys(T).length:0);
+  _salesData={type:'veh',cat:cat,catLabel:salesCatLabel(cat),y:y,m:m,periodLbl:periodLbl,unit:'คัน',zone:zRows,branch:_salesBr.rows,mix:mixRows,mAct:mAct,mTgt:mTgt,mPrev:mPrev,actTot:actTot,tgtTot:tgtTot,yearAct:yearAct,yearTgtTot:yearTgtTot,profTot:profTot,hitN:hitN,withTn:withT.length,brN:brs.length,prevTot:prevTot,valLab:'กำไร',topModels:topM.map(function(e){return {model:e[0],sold:e[1],recv:mRecv[e[0]]||0,stock:mStock[e[0]]||0};}),topColors:topC.map(function(e){return {color:e[0],sold:e[1]};})};
+}
+function renderSalesMod(mod){
+  const box=document.getElementById('salesBody');if(!box)return;
+  const rows=SDATA[mod]||[],y=salesYear(),m=vehFM||0;
+  const outLabel=(SMODS[mod].cols.find(c=>c.k==='outQty')||{}).label||'จ่ายออก';
+  const hasSale=SMODS[mod].cols.some(c=>c.k==='salePrice');
+  const T=(STGT[mod]&&STGT[mod][y])||{},hasT=Object.keys(T).length>0;
+  const brs=salesBranches(mod).slice();
+  Object.keys(T).forEach(b=>{if(brs.indexOf(b)<0)brs.push(b);});
+  rows.forEach(r=>{const b=r.branch;if(b&&brs.indexOf(b)<0)brs.push(b);});
+  const zoneOf=b=>VEH_ZONE[b]||'(ไม่ระบุ)';
+  const tAnnual=b=>{const o=T[b];return o?(+o.annual||0):0;};
+  const tMon=(b,mo)=>{const o=T[b];if(!o)return 0;const v=o.months&&o.months[mo-1];if(v!==''&&v!=null&&isFinite(+v))return +v;return o.annual?(+o.annual/12):0;};
+  const tgtOf=b=>m?tMon(b,m):tAnnual(b);
+  const act={},val={};let yearOut=0;const mAct=Array(12).fill(0);
+  rows.forEach(r=>{const k=sMonKey(r);if(!k||k[0]!==y)return;const out=sV(r.outQty);yearOut+=out;if(k[1]>=1&&k[1]<=12)mAct[k[1]-1]+=out;if(m&&k[1]!==m)return;const b=r.branch||'(ไม่ระบุ)';act[b]=(act[b]||0)+out;val[b]=(val[b]||0)+(hasSale?out*sV(r.salePrice):out*sV(r.cost));});
+  const mTgt=Array(12).fill(0);for(let mo=1;mo<=12;mo++)mTgt[mo-1]=brs.reduce((s,b)=>s+tMon(b,mo),0);
+  const mPrev=Array(12).fill(0);rows.forEach(r=>{const k=sMonKey(r);if(!k||k[0]!==y-1)return;if(k[1]>=1&&k[1]<=12)mPrev[k[1]-1]+=sV(r.outQty);});const prevTot=mPrev.reduce((a,b)=>a+b,0);
+  const periodLbl=m?(VMON_S[m-1]+' '+y):('ทั้งปี '+y);
+  const actTot=brs.reduce((s,b)=>s+(act[b]||0),0),tgtTot=brs.reduce((s,b)=>s+tgtOf(b),0);
+  const yearTgtTot=brs.reduce((s,b)=>s+tAnnual(b),0),valTot=brs.reduce((s,b)=>s+(val[b]||0),0);
+  const withT=brs.filter(b=>tgtOf(b)>0),hitN=withT.filter(b=>(act[b]||0)>=tgtOf(b)).length;
+  const half='<span style="font-size:13px;color:var(--muted)">';
+  const kSub=(a,t)=>{const p=_pcv(a,t);if(p==null)return 'ยังไม่ตั้งเป้า';const d=a-t;return _svPill(a,t)+' '+(d>=0?'เกินเป้า '+num(d):'ต่ำกว่าเป้า '+num(-d))+' ชิ้น';};
+  const valLab=hasSale?'มูลค่าขาย':'ต้นทุนแจก';
+  let kp=kpi(outLabel+' ('+periodLbl+')',num(actTot)+' '+half+'/ '+num(tgtTot)+'</span>','ชิ้น',kSub(actTot,tgtTot),SERIES[5])
+    +kpi('สะสมทั้งปี '+y,num(yearOut)+' '+half+'/ '+num(yearTgtTot)+'</span>','ชิ้น',kSub(yearOut,yearTgtTot),SERIES[4])
+    +kpi('สาขาถึงเป้า ('+periodLbl+')',num(hitN)+' '+half+'/ '+num(withT.length)+'</span>','สาขา',withT.length?('ทำได้ '+hitN+' จาก '+withT.length+' สาขา'):'ยังไม่ตั้งเป้า',SERIES[3])
+    +kpi(valLab+' ('+periodLbl+')',baht(valTot),'บาท','ข้อมูลเสริม',SERIES[2]);
+  const zAgg={};brs.forEach(b=>{const z=zoneOf(b);zAgg[z]=zAgg[z]||{tgt:0,act:0,val:0};zAgg[z].tgt+=tgtOf(b);zAgg[z].act+=(act[b]||0);zAgg[z].val+=(val[b]||0);});
+  const zRows=Object.entries(zAgg).sort((a,b)=>{const pa=a[1].tgt?a[1].act/a[1].tgt:-1,pb=b[1].tgt?b[1].act/b[1].tgt:-1;return pb-pa;});
+  const zmax=Math.max(1,...zRows.map(([z,v])=>Math.max(v.act,v.tgt)));
+  const zbars=zRows.map(([z,v])=>_svBar(z,v.act,v.tgt,zmax)).join('');
+  const zoneTbl='<table class="sum"><thead><tr><th>เขต</th><th class="num">เป้า</th><th class="num">'+esc(outLabel)+'</th><th class="num">%</th><th class="num">เกิน/ขาด</th><th class="num">'+valLab+'</th></tr></thead><tbody>'+zRows.map(([z,v])=>{const d=v.act-v.tgt;return '<tr><td>'+esc(z)+'</td><td class="num">'+num(v.tgt)+'</td><td class="num"><b>'+num(v.act)+'</b></td><td class="num">'+_svPill(v.act,v.tgt)+'</td><td class="num" style="color:'+(d>=0?'var(--good)':'var(--crit)')+'">'+(v.tgt?((d>=0?'+':'')+num(d)):'—')+'</td><td class="num">'+baht(v.val)+'</td></tr>';}).join('')+'</tbody></table>';
+  _salesBr={rows:brs.map(b=>({b:b,act:act[b]||0,tgt:tgtOf(b)})).sort((a,b)=>{const pa=a.tgt?a.act/a.tgt:-1,pb=b.tgt?b.act/b.tgt:-1;return pb-pa;}),period:periodLbl,unit:'ชิ้น'};
+  box.innerHTML=(hasT?'':'<div class="sv-note">⚠ ยังไม่มีเป้า'+salesCatLabel(mod)+'ปี '+y+' — กด “⬆ นำเข้าเป้า” เพื่อเทียบเป้า (ตอนนี้แสดงเฉพาะยอดจริง)</div>')
+    +'<div class="block" style="padding-bottom:2px"><div class="blockhead"><h3>🎯 ภาพรวม'+salesCatLabel(mod)+' — '+outLabel+' vs เป้า · '+periodLbl+'</h3><span class="hint">วัดด้วยจำนวนชิ้น · '+valLab+'เป็นข้อมูลเสริม</span></div><div class="kpis">'+kp+'</div></div>'
+    +'<div class="block"><div class="blockhead"><h3>📊 '+esc(outLabel)+' vs เป้า รายเขต</h3><span class="hint">แท่ง='+esc(outLabel)+' · เส้นดำ=เป้า</span><button class="btn sm" id="salesBrBtn" style="margin-left:auto">🏢 ดูรายสาขา ('+brs.length+')</button></div><div class="sv-bars">'+zbars+'</div></div>'
+    +_trendSection(y,mAct,mTgt,mPrev,yearOut,prevTot,esc(outLabel))
+    +'<div class="block"><div class="blockhead"><h3>🗺️ สรุปรายเขต</h3><span class="hint">เรียงตาม % · '+periodLbl+'</span></div>'+zoneTbl+'</div>';
+  _wireSalesBody(box);
+  updateStgtCnt(mod,y,hasT?Object.keys(T).length:0);
+  _salesData={type:'mod',cat:mod,catLabel:salesCatLabel(mod),y:y,m:m,periodLbl:periodLbl,unit:'ชิ้น',outLabel:outLabel,valLab:valLab,zone:zRows,branch:_salesBr.rows,mix:null,mAct:mAct,mTgt:mTgt,mPrev:mPrev,actTot:actTot,tgtTot:tgtTot,yearAct:yearOut,yearTgtTot:yearTgtTot,profTot:valTot,hitN:hitN,withTn:withT.length,brN:brs.length,prevTot:prevTot,topModels:null,topColors:null};
+}
+function updateStgtCnt(cat,y,n){const el=document.getElementById('stgtCnt');if(el)el.textContent=n?('เป้า'+salesCatLabel(cat)+' ปี '+y+': '+n+' สาขา'):('ยังไม่มีเป้า'+salesCatLabel(cat));
+  const ib=document.getElementById('stgtImportBtn');if(ib)ib.textContent='⬆ นำเข้าเป้า ('+salesCatLabel(cat)+')';}
+function daysSince(d){const m=String(d||'').match(/^(\d{4})-(\d{2})-(\d{2})/);if(!m)return null;const now=new Date();const a=Date.UTC(now.getFullYear(),now.getMonth(),now.getDate()),b=Date.UTC(+m[1],+m[2]-1,+m[3]);const dd=Math.round((a-b)/86400000);return dd<0?0:dd;}
+let _mixView='table',_mixSort='sold';
+function salesShowMix(){if(!_salesMix)return;const back=document.getElementById('salesMixModal');if(!back)return;renderMixBody();back.classList.add('open');}
+function renderMixBody(){
+  const d=_salesMix;if(!d)return;
+  document.getElementById('salesMixSub').textContent=d.cat+' · รวมทั้งหมดในระบบ · วิเคราะห์ความแม่นจัดซื้อ';
+  const ctrl='<div style="display:flex;gap:6px;flex-wrap:wrap;align-items:center;padding:8px 0 10px">'
+    +'<button class="btn sm mixbtn'+(_mixView==='table'?' active':'')+'" data-mixv="table">📋 ตารางรุ่น×สี</button>'
+    +'<button class="btn sm mixbtn'+(_mixView==='mix'?' active':'')+'" data-mixv="mix">🎨 สัดส่วนสีรายรุ่น</button>'
+    +(_mixView==='table'?'<span style="flex:1"></span><button class="btn sm mixbtn'+(_mixSort==='sold'?' active':'')+'" data-mixs="sold">เรียงขายดี</button><button class="btn sm mixbtn'+(_mixSort==='over'?' active':'')+'" data-mixs="over">เรียงค้าง/ซื้อเกิน</button>':'')
+    +'</div>';
+  let body;
+  if(_mixView==='table'){
+    const ovScore=r=>r.remain*(100-r.sellPct);
+    const rows=d.mixRows.slice().sort((a,b)=>_mixSort==='sold'?(b.sold-a.sold):(ovScore(b)-ovScore(a))).slice(0,60);
+    body='<div class="vd-lg" style="padding:0 0 6px">🔴 ซื้อเกิน/ค้าง = %ขายต่ำ+เหลือเยอะ · 🟢 ควรเติม = ขายดีเกือบหมด · %ขาย = ขาย÷รับเข้า</div>'
+      +'<table class="sum"><thead><tr><th>รุ่น</th><th>สี</th><th class="num">ขาย</th><th class="num">รับเข้า</th><th class="num">คงเหลือ</th><th class="num">%ขาย</th><th class="num">ค้าง(วัน)</th><th>สถานะ</th></tr></thead><tbody>'
+      +(rows.map(r=>{const pc=r.sellPct,pcol=pc>=80?'var(--good)':pc>=50?'var(--warn)':'var(--crit)';const fl=r.flag==='over'?'<span class="sv-pill r">🔴 ซื้อเกิน</span>':r.flag==='refill'?'<span class="sv-pill g">🟢 ควรเติม</span>':'<span style="color:var(--muted)">—</span>';
+        return '<tr><td title="'+esc(r.model)+'">'+esc(r.model)+'</td><td>'+esc(r.color)+'</td><td class="num"><b>'+num(r.sold)+'</b></td><td class="num">'+num(r.recv)+'</td><td class="num">'+num(r.remain)+'</td><td class="num" style="color:'+pcol+';font-weight:700">'+pc+'%</td><td class="num">'+(r.remain?num(r.avgAge):'—')+'</td><td>'+fl+'</td></tr>';}).join('')||'<tr><td colspan="8" style="color:var(--muted)">—</td></tr>')
+      +'</tbody></table>';
+  }else{
+    const rows=d.modelMix.slice(0,25);
+    body='<div class="vd-lg" style="padding:0 0 6px">เทียบ "สีที่ลูกค้าซื้อจริง" กับ "สีที่จัดซื้อสั่งมามากสุด" ต่อรุ่น — ไม่ตรง = อาจสั่งสีผิดตลาด</div>'
+      +'<table class="sum"><thead><tr><th>รุ่น</th><th>สีขายดีสุด</th><th>สีซื้อมากสุด</th><th class="num">ขาย/รับ</th><th>สถานะ</th></tr></thead><tbody>'
+      +(rows.map(r=>{const st=r.soldTot===0?'<span style="color:var(--muted)">ยังไม่ขาย</span>':r.match?'<span class="sv-pill g">ตรงกัน</span>':'<span class="sv-pill r">ไม่ตรง</span>';
+        return '<tr><td>'+esc(r.model)+'</td><td>'+esc(r.topSoldColor)+' <span style="color:var(--muted)">('+r.topSoldPct+'%)</span></td><td>'+esc(r.topRecvColor)+' <span style="color:var(--muted)">('+r.topRecvPct+'%)</span></td><td class="num">'+num(r.soldTot)+'/'+num(r.recvTot)+'</td><td>'+st+'</td></tr>';}).join('')||'<tr><td colspan="5" style="color:var(--muted)">—</td></tr>')
+      +'</tbody></table>';
+  }
+  const list=document.getElementById('salesMixList');list.innerHTML=ctrl+body;
+  list.querySelectorAll('[data-mixv]').forEach(b=>b.onclick=()=>{_mixView=b.dataset.mixv;renderMixBody();});
+  list.querySelectorAll('[data-mixs]').forEach(b=>b.onclick=()=>{_mixSort=b.dataset.mixs;renderMixBody();});
+}
+function salesHideMix(){const b=document.getElementById('salesMixModal');if(b)b.classList.remove('open');}
+function salesExportXlsx(){
+  if(!_salesData)return toast('ยังไม่มีข้อมูลรายงาน','warn');if(typeof XLSX==='undefined')return toast('ยังโหลดตัวอ่าน Excel ไม่สำเร็จ','err');
+  const d=_salesData,wb=XLSX.utils.book_new(),vlab=d.type==='veh'?'กำไร':d.valLab;
+  const s1=[['รายงานภาพรวมการขาย — '+d.catLabel],['ช่วง',d.periodLbl],[],
+    ['ขายในช่วง',d.actTot,'เป้า',d.tgtTot,'%',d.tgtTot?Math.round(d.actTot/d.tgtTot*100)+'%':'—'],
+    ['สะสมทั้งปี',d.yearAct,'เป้าปี',d.yearTgtTot,'%',d.yearTgtTot?Math.round(d.yearAct/d.yearTgtTot*100)+'%':'—'],
+    ['สาขาถึงเป้า',d.hitN,'จาก',d.withTn],[vlab,d.profTot],[],['สรุปรายเขต'],['เขต','เป้า','ขายจริง','%','เกิน/ขาด',vlab]];
+  d.zone.forEach(z=>{const v=z[1];s1.push([z[0],v.tgt,v.act,v.tgt?Math.round(v.act/v.tgt*100)+'%':'—',v.act-v.tgt,d.type==='veh'?v.prof:v.val]);});
+  XLSX.utils.book_append_sheet(wb,XLSX.utils.aoa_to_sheet(s1),'สรุป+รายเขต');
+  const s2=[['สาขา','เป้า','ขาย','%','เกิน/ขาด']];
+  d.branch.forEach(r=>s2.push([r.b,r.tgt,r.act,r.tgt?Math.round(r.act/r.tgt*100)+'%':'—',r.act-r.tgt]));
+  XLSX.utils.book_append_sheet(wb,XLSX.utils.aoa_to_sheet(s2),'รายสาขา');
+  if(d.mix){const s3=[['รุ่น','สี','ขาย','รับเข้า','คงเหลือ','%ขาย','ค้าง(วัน)','สถานะ']];
+    d.mix.slice().sort((a,b)=>b.sold-a.sold).forEach(r=>s3.push([r.model,r.color,r.sold,r.recv,r.remain,r.sellPct+'%',r.remain?r.avgAge:'',r.flag==='over'?'ซื้อเกิน/ค้าง':r.flag==='refill'?'ควรเติม':'']));
+    XLSX.utils.book_append_sheet(wb,XLSX.utils.aoa_to_sheet(s3),'รุ่นxสี วิเคราะห์');}
+  const s4=[['เดือน','ปี '+(d.y-1),'ปี '+d.y]];VMON_S.forEach((mn,i)=>s4.push([mn,d.mPrev[i]||0,d.mAct[i]||0]));
+  s4.push(['รวม',d.prevTot,d.mAct.reduce((a,b)=>a+b,0)]);
+  XLSX.utils.book_append_sheet(wb,XLSX.utils.aoa_to_sheet(s4),'เทียบปีต่อปี');
+  XLSX.writeFile(wb,'moto24_รายงานการขาย_'+d.catLabel+'_'+d.periodLbl.replace(/\s+/g,'')+'.xlsx');
+  toast('ส่งออกรายงานการขาย ('+d.catLabel+') แล้ว','ok');
+}
+function salesPrintReport(){
+  if(!_salesData)return toast('ยังไม่มีข้อมูลรายงาน','warn');const d=_salesData;
+  const now=new Date(),dstr=String(now.getDate()).padStart(2,'0')+'/'+String(now.getMonth()+1).padStart(2,'0')+'/'+now.getFullYear();
+  const vlab=d.type==='veh'?'กำไร (บาท)':d.valLab+' (บาท)';
+  const pc=(a,t)=>{const p=t?Math.round(a/t*100):null;return p==null?['—','']:[p+'%',(p>=100?'b-g':p>=80?'b-y':'b-r')];};
+  const p1=pc(d.actTot,d.tgtTot),p2=pc(d.yearAct,d.yearTgtTot);
+  const zt={tgt:0,act:0,v:0};d.zone.forEach(z=>{zt.tgt+=z[1].tgt;zt.act+=z[1].act;zt.v+=(d.type==='veh'?z[1].prof:z[1].val);});
+  const zoneRows=d.zone.map(z=>{const v=z[1],pp=pc(v.act,v.tgt),dd=v.act-v.tgt;return '<tr><td>'+esc(z[0])+'</td><td class="num">'+num(v.tgt)+'</td><td class="num">'+num(v.act)+'</td><td class="num '+pp[1]+'">'+pp[0]+'</td><td class="num" style="color:'+(dd>=0?'#128a54':'#c62828')+'">'+(v.tgt?((dd>=0?'+':'')+num(dd)):'—')+'</td><td class="num">'+baht(d.type==='veh'?v.prof:v.val)+'</td></tr>';}).join('');
+  const brRows=d.branch.map(r=>{const pp=pc(r.act,r.tgt),dd=r.act-r.tgt;return '<tr><td>'+esc(r.b)+'</td><td class="num">'+num(r.tgt)+'</td><td class="num">'+num(r.act)+'</td><td class="num '+pp[1]+'">'+pp[0]+'</td><td class="num" style="color:'+(dd>=0?'#128a54':'#c62828')+'">'+(r.tgt?((dd>=0?'+':'')+num(dd)):'—')+'</td></tr>';}).join('');
+  let modelSec='';
+  if(d.mix){const bm={};d.mix.forEach(r=>{const o=bm[r.model]=bm[r.model]||{sold:0,recv:0,remain:0};o.sold+=r.sold;o.recv+=r.recv;o.remain+=r.remain;});
+    const top=Object.keys(bm).map(nm=>{const o=bm[nm];const sp=o.recv?Math.round(o.sold/o.recv*100):0;let flag='';if(o.recv>=10&&sp<60)flag='over';else if(sp>=90&&o.remain<=5&&o.recv>=5)flag='refill';return {model:nm,sold:o.sold,recv:o.recv,remain:o.remain,sellPct:sp,flag:flag};}).sort((a,b)=>b.sold-a.sold).slice(0,10);
+    modelSec='<h2 class="sec">3) รุ่นขายดี + สถานะจัดซื้อ (Top 10 รายรุ่น · รวมทั้งระบบ)</h2><table><thead><tr><th>รุ่น</th><th class="num">ขาย</th><th class="num">รับเข้า</th><th class="num">คงเหลือ</th><th class="num">%ขาย</th><th>สถานะ</th></tr></thead><tbody>'
+      +top.map(r=>{const c=r.sellPct>=80?'b-g':r.sellPct>=50?'b-y':'b-r',fl=r.flag==='over'?'<span style="color:#c62828">🔴 ซื้อเกิน/ค้าง</span>':r.flag==='refill'?'<span style="color:#128a54">🟢 ควรเติม</span>':'—';return '<tr><td>'+esc(r.model)+'</td><td class="num">'+num(r.sold)+'</td><td class="num">'+num(r.recv)+'</td><td class="num">'+num(r.remain)+'</td><td class="num '+c+'">'+r.sellPct+'%</td><td>'+fl+'</td></tr>';}).join('')+'</tbody></table>';}
+  const yoyMx=Math.max(1,...d.mPrev,...d.mAct);
+  const yoyBars=VMON_S.map((mn,i)=>{const pv=d.mPrev[i]||0,cv=d.mAct[i]||0;return '<div class="mo"><div class="pair"><div class="bar py" style="height:'+Math.round(pv/yoyMx*100)+'%"></div><div class="bar cy" style="height:'+Math.round(cv/yoyMx*100)+'%"></div></div><div class="lbl">'+mn+'</div></div>';}).join('');
+  const curY=d.mAct.reduce((a,b)=>a+b,0),dp=d.prevTot?Math.round((curY-d.prevTot)/d.prevTot*100):null;
+  const secN=d.mix?4:3;
+  const w=window.open('','_blank');if(!w)return toast('เบราว์เซอร์บล็อกหน้าต่างพิมพ์','warn');
+  const css='body{font-family:\'Kanit\',\'Tahoma\',sans-serif;color:#111;margin:0;padding:14mm}'
+    +'.lh{display:flex;align-items:center;gap:14px;border-bottom:2px solid #1e2b96;padding-bottom:12px}.lh .logo{font-weight:700;font-size:28px;color:#1e2b96;line-height:1}.lh .logo .n{color:#f15a24}.lh .co{font-size:12px;color:#666;margin-top:2px}.lh .rt{margin-left:auto;text-align:right}.lh .rt h1{margin:0;font-size:18px;color:#1e2b96}.lh .rt .meta{font-size:11.5px;color:#666;margin-top:3px}'
+    +'.kpirow{display:flex;gap:10px;margin:14px 0 6px;flex-wrap:wrap}.kbox{flex:1;min-width:150px;border:1px solid #c9ccd6;border-radius:8px;padding:8px 11px}.kbox .l{font-size:11px;color:#666}.kbox .v{font-size:18px;font-weight:700;margin-top:2px}.kbox .s{font-size:11px;margin-top:2px}'
+    +'h2.sec{font-size:14px;color:#1e2b96;border-left:4px solid #f15a24;padding-left:9px;margin:18px 0 8px}'
+    +'table{border-collapse:collapse;width:100%;font-size:12px;margin-bottom:4px}th,td{border:1px solid #c9ccd6;padding:5px 9px}th{background:#f3f4f8;color:#1e2b96;font-weight:600;font-size:11.5px}td.num,th.num{text-align:right;font-variant-numeric:tabular-nums}tr.tot td{background:#eef1fb;font-weight:700}'
+    +'.b-g{color:#128a54;font-weight:700}.b-y{color:#a5730a;font-weight:700}.b-r{color:#c62828;font-weight:700}.pos{color:#128a54;font-weight:600}.neg{color:#c62828;font-weight:600}'
+    +'.yoy{display:flex;gap:3px;align-items:flex-end;height:90px;margin-top:6px;border-bottom:1px solid #c9ccd6;padding-bottom:2px}.yoy .mo{flex:1;display:flex;flex-direction:column;align-items:center;gap:2px}.yoy .pair{display:flex;gap:2px;align-items:flex-end;height:74px}.yoy .bar{width:9px;border-radius:2px 2px 0 0}.yoy .py{background:#9fb2e6}.yoy .cy{background:#1e2b96}.yoy .lbl{font-size:8.5px;color:#666}.leg{font-size:11px;color:#666;margin:4px 0 0}.leg .py{color:#5f78c9;font-weight:700}.leg .cy{color:#1e2b96;font-weight:700}'
+    +'.foot{display:flex;justify-content:space-around;margin-top:34px;gap:20px}.foot div{text-align:center;font-size:11.5px;color:#666;flex:1}.foot .sign{border-top:1px dotted #888;margin:30px 14px 5px}@media print{body{padding:12mm}}';
+  const html='<!doctype html><html><head><meta charset="utf-8"><title>รายงานภาพรวมการขาย '+esc(d.catLabel)+'</title><link href="https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;500;600;700&display=swap" rel="stylesheet"><style>'+css+'</style></head><body>'
+    +'<div class="lh"><div><div class="logo">โมโต<span class="n">24</span></div><div class="co">บริษัท โมโต24 จำกัด</div></div><div class="rt"><h1>รายงานภาพรวมการขาย</h1><div class="meta">หมวด: '+esc(d.catLabel)+' · ช่วง: '+esc(d.periodLbl)+' · พิมพ์เมื่อ '+dstr+'</div></div></div>'
+    +'<div class="kpirow"><div class="kbox"><div class="l">ขายในช่วง ('+esc(d.periodLbl)+')</div><div class="v">'+num(d.actTot)+' <span style="font-size:12px;color:#666">/ เป้า '+num(d.tgtTot)+'</span></div><div class="s '+(p1[1]==='b-r'?'neg':'pos')+'">'+p1[0]+'</div></div>'
+    +'<div class="kbox"><div class="l">สะสมทั้งปี '+d.y+'</div><div class="v">'+num(d.yearAct)+' <span style="font-size:12px;color:#666">/ เป้า '+num(d.yearTgtTot)+'</span></div><div class="s '+(p2[1]==='b-r'?'neg':'pos')+'">'+p2[0]+'</div></div>'
+    +'<div class="kbox"><div class="l">สาขาถึงเป้า</div><div class="v">'+num(d.hitN)+' <span style="font-size:12px;color:#666">/ '+num(d.withTn)+' สาขา</span></div></div>'
+    +'<div class="kbox"><div class="l">'+esc(vlab)+'</div><div class="v">'+baht(d.profTot)+'</div></div></div>'
+    +'<h2 class="sec">1) สรุปรายเขต</h2><table><thead><tr><th>เขต</th><th class="num">เป้า</th><th class="num">ขายจริง</th><th class="num">% สำเร็จ</th><th class="num">เกิน/ขาด</th><th class="num">'+esc(vlab)+'</th></tr></thead><tbody>'+zoneRows+'<tr class="tot"><td>รวม</td><td class="num">'+num(zt.tgt)+'</td><td class="num">'+num(zt.act)+'</td><td class="num">'+(zt.tgt?Math.round(zt.act/zt.tgt*100)+'%':'—')+'</td><td class="num">'+(zt.act-zt.tgt>=0?'+':'')+num(zt.act-zt.tgt)+'</td><td class="num">'+baht(zt.v)+'</td></tr></tbody></table>'
+    +'<h2 class="sec">2) สรุปรายสาขา (เรียงตาม % สำเร็จ)</h2><table><thead><tr><th>สาขา</th><th class="num">เป้า</th><th class="num">ขาย</th><th class="num">%</th><th class="num">เกิน/ขาด</th></tr></thead><tbody>'+brRows+'</tbody></table>'
+    +modelSec
+    +'<h2 class="sec">'+secN+') เทียบปีต่อปี — รายเดือน ('+(d.y-1)+' vs '+d.y+')</h2><div class="leg"><span class="py">■</span> '+(d.y-1)+' (รวม '+num(d.prevTot)+') &nbsp; <span class="cy">■</span> '+d.y+' (รวม '+num(curY)+(dp==null?'':' · '+(dp>=0?'<span class="pos">+'+dp+'%</span>':'<span class="neg">'+dp+'%</span>'))+')</div><div class="yoy">'+yoyBars+'</div>'
+    +'<div class="foot"><div><div class="sign"></div>ผู้จัดทำ</div><div><div class="sign"></div>ผู้ตรวจสอบ</div><div><div class="sign"></div>ผู้อนุมัติ</div></div>'
+    +'<script>window.onload=function(){setTimeout(function(){window.print();},350);}<\/script></body></html>';
+  w.document.write(html);w.document.close();
+}
+function salesShowBranches(){
+  if(!_salesBr)return;const back=document.getElementById('salesBrModal');if(!back)return;
+  document.getElementById('salesBrSub').textContent='ช่วง '+_salesBr.period+' · เรียงตาม % สำเร็จ';
+  const mx=Math.max(1,..._salesBr.rows.map(r=>Math.max(r.act,r.tgt)));
+  document.getElementById('salesBrList').innerHTML=_salesBr.rows.map(r=>_svBar(r.b,r.act,r.tgt,mx)).join('');
+  back.classList.add('open');
+}
+function salesHideBranches(){const b=document.getElementById('salesBrModal');if(b)b.classList.remove('open');}
+function stgtTemplate(){
+  if(typeof XLSX==='undefined')return toast('ยังโหลดตัวอ่าน Excel ไม่สำเร็จ','err');
+  const cat=salesCat,y=vehFY||(new Date().getFullYear()),head=['สาขา','ปี','เป้าทั้งปี'].concat(VMON_S),aoa=[head];
+  salesBranches(cat).forEach(b=>aoa.push([b,y,''].concat(VMON_S.map(()=>''))));
+  const wb=XLSX.utils.book_new(),ws=XLSX.utils.aoa_to_sheet(aoa);ws['!cols']=head.map((h,i)=>({wch:i===0?18:8}));
+  XLSX.utils.book_append_sheet(wb,ws,'เป้า'+salesCatLabel(cat));XLSX.writeFile(wb,'moto24_เทมเพลตเป้า_'+salesCatLabel(cat)+'.xlsx');toast('ดาวน์โหลดเทมเพลตเป้า ('+salesCatLabel(cat)+') แล้ว','ok');
+}
+function stgtExport(){
+  if(typeof XLSX==='undefined')return toast('ยังโหลดตัวอ่าน Excel ไม่สำเร็จ','err');
+  const cat=salesCat,head=['สาขา','ปี','เป้าทั้งปี'].concat(VMON_S),aoa=[head],N=STGT[cat]||{};
+  Object.keys(N).sort().forEach(y=>Object.keys(N[y]).forEach(b=>{const o=N[y][b];aoa.push([b,y,o.annual||''].concat(VMON_S.map((_,i)=>(o.months&&o.months[i]!=null&&o.months[i]!=='')?o.months[i]:'')));}));
+  if(aoa.length<2)return toast('ยังไม่มีเป้า ('+salesCatLabel(cat)+') ให้ส่งออก','warn');
+  const wb=XLSX.utils.book_new(),ws=XLSX.utils.aoa_to_sheet(aoa);XLSX.utils.book_append_sheet(wb,ws,'เป้า'+salesCatLabel(cat));XLSX.writeFile(wb,'moto24_เป้า_'+salesCatLabel(cat)+'.xlsx');toast('ส่งออกเป้า ('+salesCatLabel(cat)+') แล้ว','ok');
+}
+function stgtImportFile(file){
+  if(typeof XLSX==='undefined')return toast('ยังโหลดตัวอ่าน Excel ไม่สำเร็จ','err');
+  const cat=salesCat,rd=new FileReader();
+  rd.onload=ev=>{try{
+    const wb=XLSX.read(ev.target.result,{type:'array'}),ws=wb.Sheets[wb.SheetNames[0]];if(!ws)return toast('ไฟล์ว่าง','err');
+    const aoa=XLSX.utils.sheet_to_json(ws,{header:1,defval:'',raw:true});if(!aoa.length)return toast('ไฟล์ว่าง','err');
+    const H=aoa[0].map(h=>String(h).trim()),iB=H.indexOf('สาขา'),iY=H.indexOf('ปี'),iA=H.indexOf('เป้าทั้งปี');
+    if(iB<0||iY<0)return toast('ไม่พบคอลัมน์ “สาขา”/“ปี” — ใช้ปุ่มเทมเพลตเพื่อดูรูปแบบ','err');
+    const mIdx=VMON_S.map(mn=>H.indexOf(mn));
+    STGT[cat]=STGT[cat]||{};let n=0;const yrs=new Set();
+    for(let i=1;i<aoa.length;i++){const raw=aoa[i];if(!raw||raw.every(x=>x===''||x==null))continue;
+      const b=String(raw[iB]||'').trim(),y=String(raw[iY]||'').trim();if(!b||!y)continue;
+      const annual=Number(String(iA>=0?raw[iA]:'').replace(/[, ]/g,''))||0;
+      const months=mIdx.map(ci=>{if(ci<0)return '';const v=raw[ci];if(v===''||v==null)return '';const nz=Number(String(v).replace(/[, ]/g,''));return isFinite(nz)?nz:'';});
+      STGT[cat][y]=STGT[cat][y]||{};STGT[cat][y][b]={annual:annual,months:months};n++;yrs.add(y);}
+    stgtSave();renderSales();
+    toast(n?('นำเข้าเป้า '+salesCatLabel(cat)+' '+n+' สาขา (ปี '+[...yrs].join(', ')+')'):'ไม่พบข้อมูลเป้าในไฟล์','ok');
+  }catch(err){toast('อ่านไฟล์ไม่สำเร็จ: '+err.message,'err');}};
+  rd.readAsArrayBuffer(file);
+}
+(function wireSales(){
+  const g=id=>document.getElementById(id);
+  if(g('stgtImportBtn'))g('stgtImportBtn').onclick=()=>g('stgtFile').click();
+  if(g('stgtFile'))g('stgtFile').onchange=e=>{const f=e.target.files[0];if(f)stgtImportFile(f);e.target.value='';};
+  if(g('stgtTemplateBtn'))g('stgtTemplateBtn').onclick=stgtTemplate;
+  if(g('stgtExportBtn'))g('stgtExportBtn').onclick=stgtExport;
+  if(g('salesBrClose'))g('salesBrClose').onclick=salesHideBranches;
+  if(g('salesBrModal'))g('salesBrModal').addEventListener('click',e=>{if(e.target.id==='salesBrModal')salesHideBranches();});
+  if(g('salesMixClose'))g('salesMixClose').onclick=salesHideMix;
+  if(g('salesMixModal'))g('salesMixModal').addEventListener('click',e=>{if(e.target.id==='salesMixModal')salesHideMix();});
+  const st=g('salesTabs');if(st)st.addEventListener('click',e=>{const b=e.target.closest('.sc-tab');if(!b)return;salesCat=b.dataset.scat;renderSales();});
+  if(g('salesXlsBtn'))g('salesXlsBtn').onclick=salesExportXlsx;
+  if(g('salesPrintBtn'))g('salesPrintBtn').onclick=salesPrintReport;
+})();
 function sQtySummary(mod){
   const M=SMODS[mod];const rows=SDATA[mod];const box=document.getElementById('ssum-'+mod);if(!box)return;
   const dot=`<span class="dot" style="background:${SERIES[3]}"></span>`;
@@ -3888,11 +4294,13 @@ document.addEventListener('input',e=>{
   const q=e.target.closest('input.sq[data-sq]');if(q){SFILT[q.dataset.sq]=q.value;renderSTable(q.dataset.sq);return;}
 });
 document.addEventListener('change',e=>{
+  if((e.target.id==='vehFYear'||e.target.id==='vehFMonth')&&vehTab==='sales'){renderSales();return;}
   if((e.target.id==='vehFYear'||e.target.id==='vehFMonth')&&SMODS[vehTab]){renderSMod(vehTab);return;}
   const f=e.target.closest('input[type=file][data-simp]');if(f){if(f.files&&f.files[0]){sImport(f.dataset.simp,f.files[0]);f.value='';}return;}
   const sel=e.target.closest('select[data-sk]');if(sel){const tr=sel.closest('tr[data-sid]');if(tr){const mod=sel.dataset.smod;const r=SDATA[mod].find(x=>x.id===tr.dataset.sid);if(r){r[sel.dataset.sk]=sel.value;if(sel.dataset.sk==='branch')r.zone=VEH_ZONE[sel.value]||'';renderSMod(mod);sSave(mod);}}return;}
 });
 sLoad();
+stgtLoad();
 /* ===== ตัวช่วยเมนูซ้าย (จัดวางเท่านั้น — ไม่แตะ setDash/แท็บ/ข้อมูล) ===== */
 document.addEventListener('click',e=>{
   const nh=e.target.closest('#dashSwitch .navhead');
@@ -3918,7 +4326,7 @@ document.addEventListener('click',e=>{
   const sback=document.getElementById('sMonthModal');
   if(sback&&sback.classList.contains('open')&&e.target===sback){sHideMonthly();return;}
 });
-document.addEventListener('keydown',e=>{if(e.key==='Escape'){vehHideDaily();sHideMonthly();}});
+document.addEventListener('keydown',e=>{if(e.key==='Escape'){vehHideDaily();sHideMonthly();salesHideBranches();salesHideMix();}});
 </script>
 </body>
 </html>
